@@ -222,8 +222,7 @@
   <!-- edit modal -->
 
   <!-- confirm delete pop -->
-  <el-dialog v-model="deleteConfirmDialog" title="Warning" width="500" center
-    >x``
+  <el-dialog v-model="deleteConfirmDialog" title="Warning" width="500" center>
     <span> Are you sure you want to delete this employee? </span>
     <template #footer>
       <div class="dialog-footer">
