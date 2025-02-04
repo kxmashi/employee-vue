@@ -1,0 +1,10 @@
+/* @import './base.css'; */
+
+body {
+  margin: 0;
+}
+
+.sk-c {
+  background-color: #15915d;
+  color: #fff;
+}

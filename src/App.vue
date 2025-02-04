@@ -1,99 +1,142 @@
 <template>
-  <div>
-    <h2>Employee Data [Post]</h2>
-    <form action="post" name="add" id="add">
-      <div class="form-input">
-        <label>Name:</label>
-        <el-input
-          type="text"
-          v-model="name"
-          style="width: 240px"
-          placeholder="Juan dela Cruz"
-          required
-        />
-      </div>
-      <div class="form-input">
-        <label>Email:</label>
-        <el-input
-          type="email"
-          v-model="email"
-          style="width: 240px"
-          placeholder="juan@delacruz.com"
-          required
-        />
-      </div>
-      <div class="form-input">
-        <label>Position:</label>
-        <el-input
-          type="text"
-          v-model="position"
-          style="width: 240px"
-          placeholder="Intern"
-          required
-        />
-      </div>
-      <div class="form-input">
-        <label>Salary:</label>
-        <el-input
-          type="number"
-          v-model="salary"
-          style="width: 240px"
-          placeholder="Basic Salary"
-          required
-        />
-      </div>
-      <div class="form-input">
-        <label>SSS Number:</label>
-        <el-input
-          type="number"
-          v-model="sssNumber"
-          style="width: 240px"
-          placeholder="000000000"
-          required
-        />
-      </div>
-      <div class="form-input">
-        <label>Pag-Ibig Number:</label>
-        <el-input
-          type="number"
-          v-model="pagIbigNumber"
-          style="width: 240px"
-          placeholder="000000000"
-          required
-        />
-      </div>
-      <el-button type="primary" @click="addEmployee" plain style="margin-left: 10px"
-        >Add employee</el-button
-      >
-    </form>
-  </div>
+  <div class="common-layout">
+    <el-container>
+      <el-header class="sk-c">
+        <h1>SkanLog</h1>
+      </el-header>
 
-  <div style="margin-top: 20px">
-    <h2>Employees Data [Get & Delete]</h2>
-    <el-table :data="employees" border style="width: 100%; padding: 20px">
-      <el-table-column prop="name" label="Name" width="180" />
-      <el-table-column prop="email" label="Email" width="180" />
-      <el-table-column prop="position" label="Position" width="180" />
-      <el-table-column prop="salary" label="Salary" width="180" />
-      <el-table-column prop="sssNumber" label="SSS Number" width="180" />
-      <el-table-column prop="pagIbigNumber" label="Pag-Ibig Number" width="180" />
-      <el-table-column label="Action" width="120">
-        <template #default="scope">
-          <el-button type="danger" size="small" @click="deleteEmployee(scope.row.id)">
-            Delete
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
+      <el-main>
+        <el-row :gutter="20">
+          <!-- form column -->
+          <el-col :span="6">
+            <div class="grid-content ep-bg-purple-light">
+              <div class="add-form">
+                <h2>Employee Data [Post]</h2>
+                <el-form
+                  ref="formRef"
+                  :model="employeeData"
+                  style="max-width: 600px"
+                  class="demo-ruleForm"
+                  action="post"
+                  name="add"
+                  id="add"
+                  @submit.prevent="submitForm"
+                >
+                  <el-form-item
+                    label="Name"
+                    prop="name"
+                    :rules="[{ required: true, message: 'Name is required' }]"
+                  >
+                    <el-input v-model="employeeData.name" type="text" autocomplete="off" />
+                  </el-form-item>
 
-  <RouterView></RouterView>
+                  <el-form-item
+                    label="Email"
+                    prop="email"
+                    :rules="[
+                      { required: true, message: 'Email is required' },
+                      { type: 'email', message: 'Email must be a valid email' },
+                    ]"
+                  >
+                    <el-input v-model="employeeData.email" type="text" autocomplete="off" />
+                  </el-form-item>
+
+                  <el-form-item
+                    label="Position"
+                    prop="position"
+                    :rules="[{ required: true, message: 'Position is required' }]"
+                  >
+                    <el-input v-model="employeeData.position" type="text" autocomplete="off" />
+                  </el-form-item>
+
+                  <el-form-item
+                    label="Salary"
+                    prop="salary"
+                    :rules="[
+                      { required: true, message: 'Salary is required' },
+                      { type: 'number', message: 'Salary must be a valid number' },
+                    ]"
+                  >
+                    <el-input v-model="employeeData.salary" type="number" autocomplete="off" />
+                  </el-form-item>
+
+                  <el-form-item
+                    label="SSS Number"
+                    prop="sssNumber"
+                    :rules="[
+                      { required: true, message: 'SSS Number is required' },
+                      { type: 'number', message: 'SSS Number must be a valid number' },
+                    ]"
+                  >
+                    <el-input
+                      v-model="employeeData.sssNumber"
+                      type="number"
+                      autocomplete="off"
+                      :max-length="10"
+                    />
+                  </el-form-item>
+
+                  <el-form-item
+                    label="Pag-Ibig Number"
+                    prop="pagIbigNumber"
+                    :rules="[
+                      { required: true, message: 'Pag-Ibig Number is required' },
+                      { type: 'number', message: 'Pag-Ibig Number must be a valid number' },
+                    ]"
+                  >
+                    <el-input
+                      v-model="employeeData.pagIbigNumber"
+                      type="number"
+                      autocomplete="off"
+                      :max-length="10"
+                    />
+                  </el-form-item>
+
+                  <el-form-item>
+                    <el-button type="primary" native-type="submit">Submit</el-button>
+                  </el-form-item>
+                </el-form>
+              </div>
+            </div>
+          </el-col>
+          <!-- form column -->
+
+          <el-col :span="18">
+            <div class="grid-content ep-bg-purple">
+              <div style="margin-top: 20px">
+                <h2>Employees Data [Get & Delete]</h2>
+                <el-table :data="employees" border style="width: 100%; padding: 20px">
+                  <el-table-column prop="name" label="Name" width="180" />
+                  <el-table-column prop="email" label="Email" width="180" />
+                  <el-table-column prop="position" label="Position" width="180" />
+                  <el-table-column prop="salary" label="Salary" width="180" />
+                  <el-table-column prop="sssNumber" label="SSS Number" width="180" />
+                  <el-table-column prop="pagIbigNumber" label="Pag-Ibig Number" width="180" />
+                  <el-table-column label="Action" width="120">
+                    <template #default="scope">
+                      <el-button type="danger" size="small" @click="deleteEmployee(scope.row.id)">
+                        Delete
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+
+        <RouterView></RouterView>
+      </el-main>
+
+      <el-footer style="background-color: black; color: white"></el-footer>
+    </el-container>
+  </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 // const ApiCall = 'https://swapi.dev/api/'
 export default defineComponent({
@@ -101,12 +144,14 @@ export default defineComponent({
     return {
       likeCounter: 0,
       employees: [],
-      name: '',
-      position: '',
-      email: '',
-      salary: '',
-      sssNumber: '',
-      pagIbigNumber: '',
+      employeeData: {
+        name: '',
+        position: '',
+        email: '',
+        salary: '',
+        sssNumber: '',
+        pagIbigNumber: '',
+      },
     }
   },
   methods: {
@@ -118,29 +163,52 @@ export default defineComponent({
         this.employees = response.data
       })
     },
-    addEmployee() {
-      axios.post(`https://localhost:7043/employee`, {
-        name: this.name,
-        email: this.email,
-        position: this.position,
-        salary: this.salary,
-        sssNumber: this.sssNumber,
-        pagIbigNumber: this.pagIbigNumber,
-      })
-      alert('Employeed succesfully added')
-      location.reload()
-    },
     deleteEmployee(employeeId) {
       axios
         .delete(`https://localhost:7043/employee/${employeeId}`)
         .then(() => {
-          console.log(`Delete post with id ${employeeId}`)
-          alert('Employee successfully deleted')
+          ElMessage({
+            message: 'Employee added deleted.',
+            type: 'success',
+            plain: true,
+          })
           location.reload()
         })
         .catch((error) => {
           console.error(error)
         })
+    },
+    submitForm() {
+      this.$refs.formRef.validate((valid) => {
+        if (valid) {
+          console.log('Form submitted!')
+          axios
+            .post(`https://localhost:7043/employee`, this.employeeData)
+            .then(() => {
+              ElMessage({
+                message: 'Employee added successfully.',
+                type: 'success',
+                plain: true,
+              })
+              location.reload()
+            })
+            .catch((error) => {
+              console.error('Error adding employee:', error)
+              ElMessage({
+                message: 'Error adding employee.',
+                type: 'warning',
+                plain: true,
+              })
+            })
+        } else {
+          ElMessage({
+            message: 'All required inputs must be valid and not be empty.',
+            type: 'warning',
+            plain: true,
+          })
+          return false
+        }
+      })
     },
   },
   components: {
@@ -164,5 +232,24 @@ export default defineComponent({
 }
 .form-input label {
   min-width: 150px;
+}
+.add-form {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.el-col {
+  border-radius: 4px;
+}
+
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+
+.el-form-item__label {
+  width: 150px;
+  justify-content: flex-start !important;
 }
 </style>
