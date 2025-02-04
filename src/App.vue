@@ -13,14 +13,14 @@
               <div class="add-form">
                 <h2>Employee Data [Post]</h2>
                 <el-form
-                  ref="formRef"
+                  ref="addFormRef"
                   :model="employeeData"
                   style="max-width: 600px"
                   class="demo-ruleForm"
                   action="post"
                   name="add"
                   id="add"
-                  @submit.prevent="submitForm"
+                  @submit.prevent="createEmployee"
                 >
                   <el-form-item
                     label="Name"
@@ -52,10 +52,7 @@
                   <el-form-item
                     label="Salary"
                     prop="salary"
-                    :rules="[
-                      { required: true, message: 'Salary is required' },
-                      { type: 'number', message: 'Salary must be a valid number' },
-                    ]"
+                    :rules="[{ required: true, message: 'Salary is required' }]"
                   >
                     <el-input v-model="employeeData.salary" type="number" autocomplete="off" />
                   </el-form-item>
@@ -63,10 +60,7 @@
                   <el-form-item
                     label="SSS Number"
                     prop="sssNumber"
-                    :rules="[
-                      { required: true, message: 'SSS Number is required' },
-                      { type: 'number', message: 'SSS Number must be a valid number' },
-                    ]"
+                    :rules="[{ required: true, message: 'SSS Number is required' }]"
                   >
                     <el-input
                       v-model="employeeData.sssNumber"
@@ -79,10 +73,7 @@
                   <el-form-item
                     label="Pag-Ibig Number"
                     prop="pagIbigNumber"
-                    :rules="[
-                      { required: true, message: 'Pag-Ibig Number is required' },
-                      { type: 'number', message: 'Pag-Ibig Number must be a valid number' },
-                    ]"
+                    :rules="[{ required: true, message: 'Pag-Ibig Number is required' }]"
                   >
                     <el-input
                       v-model="employeeData.pagIbigNumber"
@@ -101,10 +92,18 @@
           </el-col>
           <!-- form column -->
 
+          <!-- table column -->
           <el-col :span="18">
             <div class="grid-content ep-bg-purple">
               <div style="margin-top: 20px">
-                <h2>Employees Data [Get & Delete]</h2>
+                <h2>Employees Data [Get , Update, & Delete]</h2>
+                <label>Search: </label>
+                <el-input
+                  v-model="search"
+                  style="width: 240px"
+                  placeholder="Please Input"
+                  @input="updateModel(search)"
+                />
                 <el-table :data="employees" border style="width: 100%; padding: 20px">
                   <el-table-column prop="name" label="Name" width="180" />
                   <el-table-column prop="email" label="Email" width="180" />
@@ -112,10 +111,17 @@
                   <el-table-column prop="salary" label="Salary" width="180" />
                   <el-table-column prop="sssNumber" label="SSS Number" width="180" />
                   <el-table-column prop="pagIbigNumber" label="Pag-Ibig Number" width="180" />
-                  <el-table-column label="Action" width="120">
+                  <el-table-column label="Action" width="150">
                     <template #default="scope">
-                      <el-button type="danger" size="small" @click="deleteEmployee(scope.row.id)">
+                      <el-button
+                        type="danger"
+                        size="small"
+                        @click="openDeleteConfirm(scope.row.id)"
+                      >
                         Delete
+                      </el-button>
+                      <el-button type="primary" size="small" @click="openEditModal(scope.row.id)">
+                        Edit
                       </el-button>
                     </template>
                   </el-table-column>
@@ -124,6 +130,7 @@
             </div>
           </el-col>
         </el-row>
+        <!-- table column -->
 
         <RouterView></RouterView>
       </el-main>
@@ -131,12 +138,108 @@
       <el-footer style="background-color: black; color: white"></el-footer>
     </el-container>
   </div>
+
+  <!-- edit modal -->
+  <el-dialog
+    v-model="editDialogVisible"
+    modal-class="overide-animation"
+    :before-close="
+      (doneFn) => {
+        console.log('before-close'), doneFn()
+      }
+    "
+  >
+    <h2>Edit employee detail</h2>
+    <el-form
+      ref="editFormRef"
+      :model="editEmployeeData"
+      style="max-width: 600px; padding: 20px"
+      class="demo-ruleForm"
+      action="post"
+      name="add"
+      id="add"
+      @submit.prevent="editEmployee(employeeId)"
+    >
+      <el-form-item
+        label="Name"
+        prop="name"
+        :rules="[{ required: true, message: 'Name is required' }]"
+      >
+        <el-input v-model="editEmployeeData.name" type="text" autocomplete="off" />
+      </el-form-item>
+
+      <el-form-item
+        label="Email"
+        prop="email"
+        :rules="[
+          { required: true, message: 'Email is required' },
+          { type: 'email', message: 'Email must be a valid email' },
+        ]"
+      >
+        <el-input v-model="editEmployeeData.email" type="text" autocomplete="off" />
+      </el-form-item>
+
+      <el-form-item
+        label="Position"
+        prop="position"
+        :rules="[{ required: true, message: 'Position is required' }]"
+      >
+        <el-input v-model="editEmployeeData.position" type="text" autocomplete="off" />
+      </el-form-item>
+
+      <el-form-item
+        label="Salary"
+        prop="salary"
+        :rules="[{ required: true, message: 'Salary is required' }]"
+      >
+        <el-input v-model="editEmployeeData.salary" type="number" autocomplete="off" />
+      </el-form-item>
+
+      <el-form-item
+        label="SSS Number"
+        prop="sssNumber"
+        :rules="[{ required: true, message: 'SSS Number is required' }]"
+      >
+        <el-input v-model="editEmployeeData.sssNumber" type="number" autocomplete="off" />
+      </el-form-item>
+
+      <el-form-item
+        label="Pag-Ibig Number"
+        prop="pagIbigNumber"
+        :rules="[{ required: true, message: 'Pag-Ibig Number is required' }]"
+      >
+        <el-input v-model="editEmployeeData.pagIbigNumber" type="number" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="editDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="editEmployee(employeeId)"> Submit </el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <!-- edit modal -->
+
+  <!-- confirm delete pop -->
+  <el-dialog v-model="deleteConfirmDialog" title="Warning" width="500" center
+    >x``
+    <span> Are you sure you want to delete this employee? </span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="deleteConfirmDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="deleteEmployee(employeeId)"> Confirm </el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <!-- confirm delete pop -->
 </template>
 
 <script>
 import { defineComponent } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import _debounce from 'lodash/debounce'
 
 // const ApiCall = 'https://swapi.dev/api/'
 export default defineComponent({
@@ -144,6 +247,7 @@ export default defineComponent({
     return {
       likeCounter: 0,
       employees: [],
+      employeeId: '',
       employeeData: {
         name: '',
         position: '',
@@ -152,34 +256,105 @@ export default defineComponent({
         sssNumber: '',
         pagIbigNumber: '',
       },
+      editEmployeeData: {
+        name: '',
+        position: '',
+        email: '',
+        salary: '',
+        sssNumber: '',
+        pagIbigNumber: '',
+      },
+      search: '',
+      editDialogVisible: false,
+      deleteConfirmDialog: false,
     }
   },
+  props: {},
   methods: {
     addLike() {
       this.likeCounter++
     },
-    getEmployees() {
-      axios.get(`https://localhost:7043/employee`).then((response) => {
-        this.employees = response.data
-      })
+    getEmployees(search) {
+      if (!search) {
+        axios.get(`https://localhost:7043/employee`).then((response) => {
+          this.employees = response.data
+        })
+      } else {
+        axios
+          .get(`https://localhost:7043/employee/filter` + '?search=' + search)
+          .then((response) => {
+            this.employees = response.data
+          })
+      }
+    },
+    updateModel: _debounce(function (newVal) {
+      this.getEmployees(newVal)
+    }, 500),
+    openDeleteConfirm(employeeId) {
+      if (employeeId) {
+        this.deleteConfirmDialog = true
+        this.employeeId = employeeId
+      }
     },
     deleteEmployee(employeeId) {
       axios
         .delete(`https://localhost:7043/employee/${employeeId}`)
         .then(() => {
           ElMessage({
-            message: 'Employee added deleted.',
+            message: 'Employee deleted successfullt.',
             type: 'success',
             plain: true,
           })
-          location.reload()
+          this.deleteConfirmDialog = false
+          this.getEmployees()
         })
         .catch((error) => {
           console.error(error)
         })
     },
-    submitForm() {
-      this.$refs.formRef.validate((valid) => {
+    openEditModal(id) {
+      if (id) {
+        this.editDialogVisible = true
+        axios.get(`https://localhost:7043/employee/${id}`).then((response) => {
+          this.editEmployeeData = response.data
+          this.employeeId = id
+        })
+      }
+    },
+    editEmployee(employeeId) {
+      this.$refs.editFormRef.validate((valid) => {
+        if (valid) {
+          axios
+            .put(`https://localhost:7043/employee` + `/${employeeId}`, this.editEmployeeData)
+            .then(() => {
+              ElMessage({
+                message: 'Employee edited successfully.',
+                type: 'success',
+                plain: true,
+              })
+              this.getEmployees()
+              this.editDialogVisible = false
+            })
+            .catch((error) => {
+              console.error('Error adding employee:', error.response.data)
+              ElMessage({
+                message: 'Error adding employee: "' + error.response.data.message + '"',
+                type: 'error',
+                plain: true,
+              })
+            })
+        } else {
+          ElMessage({
+            message: 'All required inputs must be valid and not be empty.',
+            type: 'error',
+            plain: true,
+          })
+          return false
+        }
+      })
+    },
+    createEmployee() {
+      this.$refs.addFormRef.validate((valid) => {
         if (valid) {
           console.log('Form submitted!')
           axios
@@ -190,13 +365,14 @@ export default defineComponent({
                 type: 'success',
                 plain: true,
               })
-              location.reload()
+              this.getEmployees()
+              this.employeeData = new FormData()
             })
             .catch((error) => {
-              console.error('Error adding employee:', error)
+              console.error('Error adding employee:', error.response.data.message)
               ElMessage({
-                message: 'Error adding employee.',
-                type: 'warning',
+                message: 'Error adding employee: "' + error.response.data.message + '"',
+                type: 'error',
                 plain: true,
               })
             })
@@ -215,12 +391,11 @@ export default defineComponent({
     // SampolCompownent,
   },
   created() {
-    this.getEmployees()
+    // this.getEmployees()
   },
   mounted() {
     // alert('Vue loaded')
-    console.log('test')
-    console.log(this.employees)
+    this.getEmployees()
   },
 })
 </script>
